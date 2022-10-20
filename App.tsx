@@ -1,6 +1,7 @@
 import React, {FC} from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
-import PrimaryButton from './src/components/custom/PrimaryButton';
+import {SafeAreaView, StatusBar, StyleSheet} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import HomeStackNavigator from './src/navigation/HomeStackNavigator';
 
 const App: FC = (): JSX.Element => {
   return (
@@ -9,9 +10,9 @@ const App: FC = (): JSX.Element => {
         barStyle={'light-content'}
         backgroundColor={styles.backgroundStyle.backgroundColor}
       />
-      <View style={styles.backgroundStyle}>
-        <PrimaryButton title="Order Book" />
-      </View>
+      <NavigationContainer>
+        <HomeStackNavigator />
+      </NavigationContainer>
     </SafeAreaView>
   );
 };
