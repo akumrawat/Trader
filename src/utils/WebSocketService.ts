@@ -6,27 +6,30 @@ export default class WebSocketService {
   private socket: WebSocket | undefined;
 
   public initSocket(type: WebSocketServiceType) {
-    this.socket = new WebSocket(this.getSocketURL(type));
-    this.socket.onopen = () => {
-      switch (type) {
-        case WebSocketServiceType.OrderBook:
-          let msg = JSON.stringify({
-            event: 'subscribe',
-            channel: 'book',
-            symbol: 'tBTCUSD',
-          });
-          let config = JSON.stringify({
-            event: 'conf',
-            flags: 536870912,
-          });
-          this.socket?.send(msg);
-          this.socket?.send(config);
-      }
-    };
+    if (this.socket === undefined) {
+      this.socket = new WebSocket(this.getSocketURL(type));
+      this.socket.onopen = () => {
+        switch (type) {
+          case WebSocketServiceType.OrderBook:
+            let msg = JSON.stringify({
+              event: 'subscribe',
+              channel: 'book',
+              symbol: 'tBTCUSD',
+            });
+            let config = JSON.stringify({
+              event: 'conf',
+              flags: 536870912,
+            });
+            this.socket?.send(msg);
+            this.socket?.send(config);
+        }
+      };
+    }
   }
 
   public closeWebSocket() {
     this.socket?.close();
+    this.socket = undefined;
   }
 
   public onMessage(callback: (event: WebSocketMessageEvent) => void) {

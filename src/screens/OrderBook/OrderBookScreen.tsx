@@ -7,6 +7,7 @@ import WebSocketService, {
 } from '../../utils/WebSocketService';
 
 const windowWidthHalf = Dimensions.get('window').width / 2;
+const webSocketService = new WebSocketService();
 
 const OrderBookScreen: FC = (): JSX.Element => {
   const [orders, setOrders] = useState({
@@ -15,7 +16,6 @@ const OrderBookScreen: FC = (): JSX.Element => {
     totalBids: 0,
     totalAsks: 0,
   });
-  const webSocketService = new WebSocketService();
 
   function getSum(total: number, ele: number[]) {
     return total + ele[2];
@@ -58,35 +58,22 @@ const OrderBookScreen: FC = (): JSX.Element => {
           webSocketService.closeWebSocket();
         }}
       />
-      <View style={{flex: 1, flexDirection: 'row'}}>
-        <View
-          style={{
-            flex: 1,
-          }}>
+      <View style={styles.parentOrderBookView}>
+        <View style={styles.flexView}>
           <FlatList
             data={orders.bids}
             renderItem={({item}) => (
               <View>
-                <View
-                  style={{
-                    position: 'absolute',
-                    flexDirection: 'row',
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                  }}>
+                <View style={styles.orderBookBackgroundView}>
+                  <View style={styles.flexView} />
                   <View
                     style={{
-                      flex: 1,
-                    }}></View>
-                  <View
-                    style={{
-                      backgroundColor: '#10454B',
+                      ...styles.bidsColorView,
                       width: (item[3] / orders.totalBids) * windowWidthHalf,
-                    }}></View>
+                    }}
+                  />
                 </View>
-                <View style={{flexDirection: 'row'}}>
+                <View style={styles.rowFlexView}>
                   <Text style={styles.orderText}>{item[1]}</Text>
                   <Text style={styles.orderText}>
                     {parseFloat(item[2]).toPrecision(4)}
@@ -97,34 +84,21 @@ const OrderBookScreen: FC = (): JSX.Element => {
             )}
           />
         </View>
-        <View
-          style={{
-            flex: 1,
-          }}>
+        <View style={styles.flexView}>
           <FlatList
             data={orders.asks}
             renderItem={({item}) => (
               <View>
-                <View
-                  style={{
-                    position: 'absolute',
-                    flexDirection: 'row',
-                    top: 0,
-                    left: 0,
-                    bottom: 0,
-                    right: 0,
-                  }}>
+                <View style={styles.orderBookBackgroundView}>
                   <View
                     style={{
-                      backgroundColor: '#403340',
+                      ...styles.asksColorView,
                       width: (item[3] / orders.totalAsks) * windowWidthHalf,
-                    }}></View>
-                  <View
-                    style={{
-                      flex: 1,
-                    }}></View>
+                    }}
+                  />
+                  <View style={styles.flexView} />
                 </View>
-                <View style={{flexDirection: 'row'}}>
+                <View style={styles.rowFlexView}>
                   <Text style={styles.orderText}>{item[0]}</Text>
                   <Text style={styles.orderText}>
                     {(parseFloat(item[2]) * -1).toPrecision(4)}
@@ -147,7 +121,36 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     justifyContent: 'center',
   },
-  orderText: {color: 'white', flex: 1, textAlign: 'center', fontSize: 11},
+  orderText: {
+    color: 'white',
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 11,
+  },
+  parentOrderBookView: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  flexView: {
+    flex: 1,
+  },
+  orderBookBackgroundView: {
+    position: 'absolute',
+    flexDirection: 'row',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  },
+  rowFlexView: {
+    flexDirection: 'row',
+  },
+  bidsColorView: {
+    backgroundColor: '#10454B',
+  },
+  asksColorView: {
+    backgroundColor: '#403340',
+  },
 });
 
 export default OrderBookScreen;

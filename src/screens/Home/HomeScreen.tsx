@@ -2,7 +2,6 @@ import React, {FC} from 'react';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
 import PrimaryButton from '../../components/custom/PrimaryButton';
-import WebSocketService from '../../utils/WebSocketService';
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
