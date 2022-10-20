@@ -8,9 +8,15 @@ import WebSocketService, {
 
 const windowWidthHalf = Dimensions.get('window').width / 2;
 const webSocketService = new WebSocketService();
+interface OrdersBook {
+  bids: number[][];
+  asks: number[][];
+  totalBids: number;
+  totalAsks: number;
+}
 
 const OrderBookScreen: FC = (): JSX.Element => {
-  const [orders, setOrders] = useState({
+  const [orders, setOrders] = useState<OrdersBook>({
     bids: [],
     asks: [],
     totalBids: 0,
@@ -75,9 +81,7 @@ const OrderBookScreen: FC = (): JSX.Element => {
                 </View>
                 <View style={styles.rowFlexView}>
                   <Text style={styles.orderText}>{item[1]}</Text>
-                  <Text style={styles.orderText}>
-                    {parseFloat(item[2]).toPrecision(4)}
-                  </Text>
+                  <Text style={styles.orderText}>{item[2].toPrecision(4)}</Text>
                   <Text style={styles.orderText}>{item[0]}</Text>
                 </View>
               </View>
@@ -101,7 +105,7 @@ const OrderBookScreen: FC = (): JSX.Element => {
                 <View style={styles.rowFlexView}>
                   <Text style={styles.orderText}>{item[0]}</Text>
                   <Text style={styles.orderText}>
-                    {(parseFloat(item[2]) * -1).toPrecision(4)}
+                    {(item[2] * -1).toPrecision(4)}
                   </Text>
                   <Text style={styles.orderText}>{item[1]}</Text>
                 </View>
