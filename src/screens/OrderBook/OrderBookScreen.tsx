@@ -1,8 +1,13 @@
 import React, {FC, useState} from 'react';
 import {FlatList, StyleSheet, Text, View, Dimensions} from 'react-native';
 import PrimaryButton from '../../components/custom/PrimaryButton';
-let ws: WebSocket;
+import {getAsks, getBids} from '../../utils/OrderBookUtils';
+import WebSocketService, {
+  WebSocketServiceType,
+} from '../../utils/WebSocketService';
+
 const windowWidthHalf = Dimensions.get('window').width / 2;
+
 const OrderBookScreen: FC = (): JSX.Element => {
   const [orders, setOrders] = useState({
     bids: [],
@@ -10,62 +15,17 @@ const OrderBookScreen: FC = (): JSX.Element => {
     totalBids: 0,
     totalAsks: 0,
   });
+  const webSocketService = new WebSocketService();
 
-  function getSum(total, ele) {
+  function getSum(total: number, ele: number[]) {
     return total + ele[2];
   }
 
-  const updateOrders = (ordersBatch: any[]) => {
-    let newBids = orders.bids;
-    ordersBatch.forEach(order => {
-      if (order !== undefined) {
-        if (order[2] > 0) {
-          const index = newBids.findIndex(ele => ele[0] === order[0]);
-          if (index === -1) {
-            newBids.push(order);
-          } else {
-            newBids[index] = order;
-          }
-        }
-      }
-    });
-    newBids = newBids.filter(ele => ele[1] !== 0 && ele[0] !== undefined);
-
-    let newAsks = orders.asks;
-    ordersBatch.forEach(order => {
-      if (order !== undefined) {
-        if (order[2] < 0) {
-          const index = newAsks.findIndex(ele => ele[0] === order[0]);
-          if (index === -1) {
-            newAsks.push(order);
-          } else {
-            newAsks[index] = order;
-          }
-        }
-      }
-    });
-    newAsks = newAsks.filter(ele => ele[1] !== 0 && ele[0] !== undefined);
-    newBids.sort(function (a, b) {
-      return b[0] - a[0];
-    });
-    newAsks.sort(function (a, b) {
-      return a[0] - b[0];
-    });
+  const updateOrders = (ordersBatch: any[][]) => {
+    const newBids = getBids(ordersBatch, orders.bids);
+    const newAsks = getAsks(ordersBatch, orders.asks);
     const newTotalBids = newBids.reduce(getSum, 0);
     const newTotalAsks = newAsks.reduce(getSum, 0);
-
-    let bidsSum = 0;
-    newBids.map(ele => {
-      bidsSum = bidsSum + ele[2];
-      ele[3] = bidsSum;
-      return ele;
-    });
-    let asksSum = 0;
-    newAsks.map(ele => {
-      asksSum = asksSum + ele[2];
-      ele[3] = asksSum;
-      return ele;
-    });
 
     setOrders({
       bids: newBids,
@@ -80,24 +40,8 @@ const OrderBookScreen: FC = (): JSX.Element => {
       <PrimaryButton
         title="open"
         onPress={() => {
-          ws = new WebSocket('wss://api-pub.bitfinex.com/ws/2');
-          let msg = JSON.stringify({
-            event: 'subscribe',
-            channel: 'book',
-            symbol: 'tBTCUSD',
-          });
-
-          let config = JSON.stringify({
-            event: 'conf',
-            flags: 536870912,
-          });
-
-          ws.onopen = () => {
-            ws.send(msg);
-            ws.send(config);
-          };
-
-          ws.onmessage = msgs => {
+          webSocketService.initSocket(WebSocketServiceType.OrderBook);
+          webSocketService.onMessage(msgs => {
             if (msgs.data !== undefined) {
               const ordersBatch = JSON.parse(msgs.data)[1];
 
@@ -105,13 +49,13 @@ const OrderBookScreen: FC = (): JSX.Element => {
                 updateOrders(ordersBatch);
               }
             }
-          };
+          });
         }}
       />
       <PrimaryButton
         title="close"
         onPress={() => {
-          ws.close();
+          webSocketService.closeWebSocket();
         }}
       />
       <View style={{flex: 1, flexDirection: 'row'}}>
