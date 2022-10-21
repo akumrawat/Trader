@@ -2,6 +2,7 @@ import React, {FC} from 'react';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
 import PrimaryButton from '../../components/custom/PrimaryButton';
+import {AppTheme} from '../../constants/colors';
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
@@ -28,7 +29,7 @@ const HomeScreen: FC<HomeScreenProps> = (props): JSX.Element => {
 
 const styles = StyleSheet.create({
   backgroundStyle: {
-    backgroundColor: '#142D3D',
+    backgroundColor: AppTheme.colors.primaryBackgroundColor,
     flex: 1,
     alignContent: 'center',
     justifyContent: 'center',

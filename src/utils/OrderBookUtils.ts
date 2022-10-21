@@ -1,4 +1,4 @@
-import {OrderBookModel} from '../models/OrderBookModel';
+import {OrderBookModel} from '../types/OrderBookModel';
 
 export const getBids = (
   ordersBatch: OrderBookModel[],

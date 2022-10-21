@@ -1,7 +1,7 @@
 import React, {FC} from 'react';
 import {SafeAreaView, StatusBar, StyleSheet} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
-import HomeStackNavigator from './src/navigation/HomeStackNavigator';
+import {AppTheme} from './src/constants/colors';
+import MainNavigationContainer from './src/navigators';
 
 const App: FC = (): JSX.Element => {
   return (
@@ -10,16 +10,14 @@ const App: FC = (): JSX.Element => {
         barStyle={'light-content'}
         backgroundColor={styles.backgroundStyle.backgroundColor}
       />
-      <NavigationContainer>
-        <HomeStackNavigator />
-      </NavigationContainer>
+      <MainNavigationContainer />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   backgroundStyle: {
-    backgroundColor: '#142D3D',
+    backgroundColor: AppTheme.colors.primaryBackgroundColor,
     flex: 1,
     alignContent: 'center',
     justifyContent: 'center',
