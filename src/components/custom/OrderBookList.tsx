@@ -21,7 +21,12 @@ const OrderBookList: FC<OrderBookListProps> = (props): JSX.Element => {
       data={props.orders}
       renderItem={({item}) => (
         <View>
-          <View style={styles.orderBookBackgroundView}>
+          <View
+            style={{
+              ...styles.orderBookBackgroundView,
+              flexDirection:
+                props.orderType === OrderType.bids ? 'row' : 'row-reverse',
+            }}>
             <View style={styles.flexView} />
             <View
               style={{
@@ -65,7 +70,6 @@ const styles = StyleSheet.create({
   },
   orderBookBackgroundView: {
     position: 'absolute',
-    flexDirection: 'row',
     top: 0,
     left: 0,
     bottom: 0,
