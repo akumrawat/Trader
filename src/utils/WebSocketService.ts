@@ -1,3 +1,5 @@
+import {OrderBookModel} from '../models/OrderBookModel';
+
 export enum WebSocketServiceType {
   OrderBook,
 }
@@ -32,9 +34,30 @@ export default class WebSocketService {
     this.socket = undefined;
   }
 
-  public onMessage(callback: (event: WebSocketMessageEvent) => void) {
+  public onMessage(callback: (ordersBook: OrderBookModel[]) => void) {
     if (this.socket !== undefined) {
-      this.socket.onmessage = callback;
+      this.socket.onmessage = msgs => {
+        if (msgs.data !== undefined) {
+          const ordersBatchResponse = JSON.parse(msgs.data)[1];
+          if (
+            ordersBatchResponse !== undefined &&
+            Array.isArray(ordersBatchResponse)
+          ) {
+            let ordersBatch: OrderBookModel[] = ordersBatchResponse.map(
+              (ele: any[]) => {
+                let model: OrderBookModel = {
+                  price: ele[0],
+                  count: ele[1],
+                  amount: ele[2],
+                  totalAmount: 0,
+                };
+                return model;
+              },
+            );
+            callback(ordersBatch);
+          }
+        }
+      };
     }
   }
 

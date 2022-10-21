@@ -1,16 +1,17 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useRef, useState} from 'react';
 import {FlatList, StyleSheet, Text, View, Dimensions} from 'react-native';
 import PrimaryButton from '../../components/custom/PrimaryButton';
+import {OrderBookModel} from '../../models/OrderBookModel';
 import {getAsks, getBids} from '../../utils/OrderBookUtils';
 import WebSocketService, {
   WebSocketServiceType,
 } from '../../utils/WebSocketService';
 
 const windowWidthHalf = Dimensions.get('window').width / 2;
-const webSocketService = new WebSocketService();
+
 interface OrdersBook {
-  bids: number[][];
-  asks: number[][];
+  bids: OrderBookModel[];
+  asks: OrderBookModel[];
   totalBids: number;
   totalAsks: number;
 }
@@ -22,12 +23,13 @@ const OrderBookScreen: FC = (): JSX.Element => {
     totalBids: 0,
     totalAsks: 0,
   });
+  const webSocketService = useRef<WebSocketService>(new WebSocketService());
 
-  function getSum(total: number, ele: number[]) {
-    return total + ele[2];
+  function getSum(total: number, ele: OrderBookModel): number {
+    return total + ele.amount;
   }
 
-  const updateOrders = (ordersBatch: any[][]) => {
+  const updateOrders = (ordersBatch: OrderBookModel[]) => {
     const newBids = getBids(ordersBatch, orders.bids);
     const newAsks = getAsks(ordersBatch, orders.asks);
     const newTotalBids = newBids.reduce(getSum, 0);
@@ -46,22 +48,20 @@ const OrderBookScreen: FC = (): JSX.Element => {
       <PrimaryButton
         title="open"
         onPress={() => {
-          webSocketService.initSocket(WebSocketServiceType.OrderBook);
-          webSocketService.onMessage(msgs => {
-            if (msgs.data !== undefined) {
-              const ordersBatch = JSON.parse(msgs.data)[1];
-
-              if (ordersBatch !== undefined && Array.isArray(ordersBatch)) {
+          webSocketService.current.initSocket(WebSocketServiceType.OrderBook);
+          webSocketService.current.onMessage(
+            (ordersBatch: OrderBookModel[]) => {
+              if (ordersBatch !== undefined) {
                 updateOrders(ordersBatch);
               }
-            }
-          });
+            },
+          );
         }}
       />
       <PrimaryButton
         title="close"
         onPress={() => {
-          webSocketService.closeWebSocket();
+          webSocketService.current.closeWebSocket();
         }}
       />
       <View style={styles.parentOrderBookView}>
@@ -75,14 +75,17 @@ const OrderBookScreen: FC = (): JSX.Element => {
                   <View
                     style={{
                       ...styles.bidsColorView,
-                      width: (item[3] / orders.totalBids) * windowWidthHalf,
+                      width:
+                        (item.totalAmount / orders.totalBids) * windowWidthHalf,
                     }}
                   />
                 </View>
                 <View style={styles.rowFlexView}>
-                  <Text style={styles.orderText}>{item[1]}</Text>
-                  <Text style={styles.orderText}>{item[2].toPrecision(4)}</Text>
-                  <Text style={styles.orderText}>{item[0]}</Text>
+                  <Text style={styles.orderText}>{item.count}</Text>
+                  <Text style={styles.orderText}>
+                    {item.amount.toPrecision(4)}
+                  </Text>
+                  <Text style={styles.orderText}>{item.price}</Text>
                 </View>
               </View>
             )}
@@ -97,17 +100,18 @@ const OrderBookScreen: FC = (): JSX.Element => {
                   <View
                     style={{
                       ...styles.asksColorView,
-                      width: (item[3] / orders.totalAsks) * windowWidthHalf,
+                      width:
+                        (item.totalAmount / orders.totalAsks) * windowWidthHalf,
                     }}
                   />
                   <View style={styles.flexView} />
                 </View>
                 <View style={styles.rowFlexView}>
-                  <Text style={styles.orderText}>{item[0]}</Text>
+                  <Text style={styles.orderText}>{item.price}</Text>
                   <Text style={styles.orderText}>
-                    {(item[2] * -1).toPrecision(4)}
+                    {(item.amount * -1).toPrecision(4)}
                   </Text>
-                  <Text style={styles.orderText}>{item[1]}</Text>
+                  <Text style={styles.orderText}>{item.count}</Text>
                 </View>
               </View>
             )}
