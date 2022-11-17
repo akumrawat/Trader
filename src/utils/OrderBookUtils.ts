@@ -2,11 +2,12 @@ import {OrderBookModel} from '../types/OrderBookModel';
 
 export const getBids = (
   ordersBatch: OrderBookModel[],
-  currentBids: OrderBookModel[],
+  currentBids: OrderBookModel[], /// getting modified
 ): OrderBookModel[] => {
-  let newBids = currentBids;
+  let newBids = currentBids; /// new bids as empty array
   ordersBatch.forEach(order => {
-    if (order !== undefined) {
+    if (order) {
+      /// check order undefined not reequired
       if (order.amount > 0) {
         const index = newBids.findIndex(ele => ele.price === order.price);
         if (index === -1) {
@@ -23,7 +24,8 @@ export const getBids = (
   });
   let bidsSum = 0;
   newBids.map(ele => {
-    bidsSum = bidsSum + ele.amount;
+    /// map and foreach difference
+    bidsSum = bidsSum + ele.amount; /// use reduce for sum
     ele.totalAmount = bidsSum;
     return ele;
   });
@@ -36,7 +38,7 @@ export const getAsks = (
 ): OrderBookModel[] => {
   let newAsks = currentAsks;
   ordersBatch.forEach(order => {
-    if (order !== undefined) {
+    if (order) {
       if (order.amount < 0) {
         const index = newAsks.findIndex(ele => ele.price === order.price);
         if (index === -1) {
@@ -47,7 +49,7 @@ export const getAsks = (
       }
     }
   });
-  newAsks = newAsks.filter(ele => ele.count !== 0 && ele.price !== undefined);
+  newAsks = newAsks.filter(ele => ele.count !== 0 && ele.price !== undefined); /// separate common logic
   newAsks.sort(function (a, b) {
     return a.price - b.price;
   });

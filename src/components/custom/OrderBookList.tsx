@@ -1,17 +1,20 @@
 import React, {FC} from 'react';
-import {FlatList, StyleSheet, Text, View, Dimensions} from 'react-native';
-import {AppTheme} from '../../constants/colors';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  View,
+  Dimensions,
+  ColorValue,
+} from 'react-native';
 import {OrderBookModel} from '../../types/OrderBookModel';
 
-export const OrderType = {
-  bids: 'bids',
-  asks: 'asks',
-};
-
 interface OrderBookListProps {
-  orderType: string;
   orders: OrderBookModel[];
   totalQuantity: number;
+  flexDirection: 'row' | 'row-reverse' | undefined;
+  backgroundColor: ColorValue;
+  amountMultiplier: number;
 }
 const windowWidthHalf = Dimensions.get('window').width / 2;
 
@@ -24,16 +27,12 @@ const OrderBookList: FC<OrderBookListProps> = (props): JSX.Element => {
           <View
             style={{
               ...styles.orderBookBackgroundView,
-              flexDirection:
-                props.orderType === OrderType.bids ? 'row' : 'row-reverse',
+              flexDirection: props.flexDirection,
             }}>
             <View style={styles.flexView} />
             <View
               style={{
-                backgroundColor:
-                  props.orderType === OrderType.bids
-                    ? AppTheme.colors.bidsBackgroundColor
-                    : AppTheme.colors.asksBackgroundColor,
+                backgroundColor: props.backgroundColor,
                 width:
                   (item.totalAmount / props.totalQuantity) * windowWidthHalf,
               }}
@@ -41,14 +40,11 @@ const OrderBookList: FC<OrderBookListProps> = (props): JSX.Element => {
           </View>
           <View
             style={{
-              flexDirection:
-                props.orderType === OrderType.bids ? 'row' : 'row-reverse',
+              flexDirection: props.flexDirection,
             }}>
             <Text style={styles.orderText}>{item.count}</Text>
             <Text style={styles.orderText}>
-              {(
-                item.amount * (props.orderType === OrderType.bids ? 1 : -1)
-              ).toPrecision(4)}
+              {(item.amount * props.amountMultiplier).toPrecision(4)}
             </Text>
             <Text style={styles.orderText}>{item.price}</Text>
           </View>
@@ -64,6 +60,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     fontSize: 11,
+    flexDirection: 'row',
   },
   flexView: {
     flex: 1,

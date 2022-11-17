@@ -1,60 +1,12 @@
-import React, {FC, useRef, useState} from 'react';
+import React, {FC} from 'react';
 import {StyleSheet, View} from 'react-native';
-import OrderBookList, {OrderType} from '../../components/custom/OrderBookList';
+import OrderBookList from '../../components/custom/OrderBookList';
 import PrimaryButton from '../../components/custom/PrimaryButton';
 import {AppTheme} from '../../constants/colors';
-import {OrderBookModel} from '../../types/OrderBookModel';
-import {extractAsks, extractBids} from '../../utils';
-import WebSocketService, {
-  WebSocketServiceType,
-} from '../../utils/WebSocketService';
-
-interface OrdersBook {
-  bids: OrderBookModel[];
-  asks: OrderBookModel[];
-  totalBids: number;
-  totalAsks: number;
-}
+import useOrderBook from '../../utils/hooks/useOrderBook';
 
 const OrderBookScreen: FC = (): JSX.Element => {
-  const [orders, setOrders] = useState<OrdersBook>({
-    bids: [],
-    asks: [],
-    totalBids: 0,
-    totalAsks: 0,
-  });
-  const webSocketService = useRef<WebSocketService>(new WebSocketService());
-
-  const getSum = (total: number, ele: OrderBookModel): number => {
-    return total + ele.amount;
-  };
-
-  const updateOrders = (ordersBatch: OrderBookModel[]) => {
-    const newBids = extractBids(ordersBatch, orders.bids);
-    const newAsks = extractAsks(ordersBatch, orders.asks);
-    const newTotalBids = newBids.reduce(getSum, 0);
-    const newTotalAsks = newAsks.reduce(getSum, 0);
-
-    setOrders({
-      bids: newBids,
-      asks: newAsks,
-      totalBids: newTotalBids,
-      totalAsks: newTotalAsks,
-    });
-  };
-
-  const onPressOpen = () => {
-    webSocketService.current.initSocket(WebSocketServiceType.OrderBook);
-    webSocketService.current.onMessage((ordersBatch: OrderBookModel[]) => {
-      if (ordersBatch !== undefined) {
-        updateOrders(ordersBatch);
-      }
-    });
-  };
-
-  const onPressClose = () => {
-    webSocketService.current.closeWebSocket();
-  };
+  const [orders, onPressClose, onPressOpen] = useOrderBook();
 
   return (
     <View style={styles.backgroundStyle}>
@@ -63,16 +15,20 @@ const OrderBookScreen: FC = (): JSX.Element => {
       <View style={styles.parentOrderBookView}>
         <View style={styles.flexView}>
           <OrderBookList
-            orderType={OrderType.bids}
             orders={orders.bids}
             totalQuantity={orders.totalBids}
+            flexDirection={'row'}
+            backgroundColor={AppTheme.colors.bidsBackgroundColor}
+            amountMultiplier={1}
           />
         </View>
         <View style={styles.flexView}>
           <OrderBookList
-            orderType={OrderType.asks}
             orders={orders.asks}
             totalQuantity={orders.totalAsks}
+            flexDirection={'row-reverse'}
+            backgroundColor={AppTheme.colors.asksBackgroundColor}
+            amountMultiplier={-1}
           />
         </View>
       </View>
