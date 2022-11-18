@@ -16,5 +16,13 @@ export interface WebSocketServiceType {
   message: string;
   config: string;
   socketURL: string;
-  handler: (event: WebSocketMessageEvent) => OrderBookModel[] | null;
+  handler: (event: WebSocketMessageEvent) => any;
+}
+
+export interface OHLCModel {
+  x: Date;
+  open: number;
+  close: number;
+  high: number;
+  low: number;
 }

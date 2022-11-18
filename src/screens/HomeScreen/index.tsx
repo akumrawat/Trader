@@ -3,6 +3,7 @@ import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {SafeAreaView, StatusBar, StyleSheet, View} from 'react-native';
 import PrimaryButton from '../../components/custom/PrimaryButton';
 import {AppTheme} from '../../constants/colors';
+import {ScreenNames} from '../../navigators/constants/ScreenNames';
 
 interface HomeScreenProps {
   navigation: NativeStackNavigationProp<any, any>;
@@ -19,7 +20,13 @@ const HomeScreen: FC<HomeScreenProps> = (props): JSX.Element => {
         <PrimaryButton
           title="Order Book"
           onPress={() => {
-            props.navigation.navigate('OrderBookScreen', {});
+            props.navigation.navigate(ScreenNames.OrderBook, {});
+          }}
+        />
+        <PrimaryButton
+          title="OHLC"
+          onPress={() => {
+            props.navigation.navigate(ScreenNames.OHLCScreen, {});
           }}
         />
       </View>

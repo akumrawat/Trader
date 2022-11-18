@@ -1,37 +1,33 @@
 import React, {FC} from 'react';
 import {StyleSheet, View} from 'react-native';
-import OrderBookList from '../../components/custom/OrderBookList';
+import {
+  VictoryAxis,
+  VictoryCandlestick,
+  VictoryChart,
+  VictoryTheme,
+} from 'victory-native';
 import PrimaryButton from '../../components/custom/PrimaryButton';
 import {AppTheme} from '../../constants/colors';
-import useOrderBook from '../../utils/hooks/useOrderBook';
+import useOHLC from '../../utils/hooks/useOHLC';
 
 const OHLCScreen: FC = (): JSX.Element => {
-  const [orders, onPressClose, onPressOpen] = useOrderBook();
-
+  const [orders, onPressClose, onPressOpen] = useOHLC();
   return (
     <View style={styles.backgroundStyle}>
       <PrimaryButton title="open" onPress={onPressOpen} />
       <PrimaryButton title="close" onPress={onPressClose} />
-      <View style={styles.parentOrderBookView}>
-        <View style={styles.flexView}>
-          <OrderBookList
-            orders={orders.bids}
-            totalQuantity={orders.totalBids}
-            flexDirection={'row'}
-            backgroundColor={AppTheme.colors.bidsBackgroundColor}
-            amountMultiplier={1}
-          />
-        </View>
-        <View style={styles.flexView}>
-          <OrderBookList
-            orders={orders.asks}
-            totalQuantity={orders.totalAsks}
-            flexDirection={'row-reverse'}
-            backgroundColor={AppTheme.colors.asksBackgroundColor}
-            amountMultiplier={-1}
-          />
-        </View>
-      </View>
+      <VictoryChart
+        theme={VictoryTheme.material}
+        domainPadding={{x: 25}}
+        scale={{x: 'time'}}>
+        <VictoryAxis tickFormat={t => `${t.getDate()}/${t.getMonth()}`} />
+        <VictoryAxis dependentAxis />
+        <VictoryCandlestick
+          candleWidth={10}
+          candleColors={{positive: '#5f5c5b', negative: '#c43a31'}}
+          data={orders.slice(-20)}
+        />
+      </VictoryChart>
     </View>
   );
 };
