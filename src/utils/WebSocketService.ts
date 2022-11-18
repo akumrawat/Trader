@@ -4,7 +4,7 @@ export default class WebSocketService {
   public socket!: WebSocket | null;
 
   public initSocket(type: WebSocketServiceType) {
-    if (this.socket === undefined) {
+    if (!this.socket) {
       this.socket = new WebSocket(type.socketURL);
       this.socket.onopen = () => {
         this.socket?.send(type.message);

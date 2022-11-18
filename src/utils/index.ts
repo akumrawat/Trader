@@ -1,3 +1,3 @@
-import {getBids, getAsks} from './OrderBookUtils';
+import {getOrders} from './OrderBookUtils';
 
-export {getBids, getAsks};
+export {getOrders};

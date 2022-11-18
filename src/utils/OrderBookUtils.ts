@@ -1,63 +1,34 @@
 import {OrderBookModel} from '../types/OrderBookModel';
 
-export const getBids = (
-  ordersBatch: OrderBookModel[],
-  currentBids: OrderBookModel[], /// getting modified
-): OrderBookModel[] => {
-  let newBids = currentBids; /// new bids as empty array
-  ordersBatch.forEach(order => {
-    if (order) {
-      /// check order undefined not reequired
-      if (order.amount > 0) {
-        const index = newBids.findIndex(ele => ele.price === order.price);
-        if (index === -1) {
-          newBids.push(order);
-        } else {
-          newBids[index] = order;
-        }
-      }
-    }
-  });
-  newBids = newBids.filter(ele => ele.count !== 0 && ele.price !== undefined);
-  newBids.sort(function (a, b) {
-    return b.price - a.price;
-  });
-  let bidsSum = 0;
-  newBids.map(ele => {
-    /// map and foreach difference
-    bidsSum = bidsSum + ele.amount; /// use reduce for sum
-    ele.totalAmount = bidsSum;
-    return ele;
-  });
-  return newBids;
+const updateSum = (total: number, ele: OrderBookModel): number => {
+  ele.totalAmount = total;
+  return total + ele.amount;
 };
 
-export const getAsks = (
-  ordersBatch: OrderBookModel[],
-  currentAsks: OrderBookModel[],
+export const getOrders = (
+  newOrdersBatch: OrderBookModel[],
+  currentOrdersBatch: OrderBookModel[],
+  comparator: 1 | -1,
 ): OrderBookModel[] => {
-  let newAsks = currentAsks;
-  ordersBatch.forEach(order => {
+  let newBatch = Array.from(currentOrdersBatch);
+  newOrdersBatch.forEach(order => {
     if (order) {
-      if (order.amount < 0) {
-        const index = newAsks.findIndex(ele => ele.price === order.price);
+      if (order.amount * comparator > 0) {
+        const index = newBatch.findIndex(ele => ele.price === order.price);
         if (index === -1) {
-          newAsks.push(order);
+          newBatch.push(order);
         } else {
-          newAsks[index] = order;
+          newBatch[index] = order;
         }
       }
     }
   });
-  newAsks = newAsks.filter(ele => ele.count !== 0 && ele.price !== undefined); /// separate common logic
-  newAsks.sort(function (a, b) {
-    return a.price - b.price;
+  newBatch = newBatch.filter(ele => ele.count !== 0 && ele.price !== undefined);
+  newBatch.sort(function (a, b) {
+    return b.price * comparator - a.price * comparator;
   });
-  let asksSum = 0;
-  newAsks.map(ele => {
-    asksSum = asksSum + ele.amount;
-    ele.totalAmount = asksSum;
-    return ele;
-  });
-  return newAsks;
+
+  newBatch.reduce(updateSum, 0);
+
+  return newBatch;
 };

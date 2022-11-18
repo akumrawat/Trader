@@ -1,11 +1,11 @@
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {URLs} from '../../constants/urls';
 import {
   OrderBookModel,
   OrdersBook,
   WebSocketServiceType,
 } from '../../types/OrderBookModel';
-import {getBids, getAsks} from '../../utils';
+import {getOrders} from '../../utils';
 import WebSocketService from '../../utils/WebSocketService';
 
 function handleOrderBookMessage(
@@ -56,15 +56,19 @@ const useOrderBook = (): [OrdersBook, () => void, () => void] => {
     totalBids: 0,
     totalAsks: 0,
   });
+  const [ordersBatch, setOrdersBatch] = useState<any>([]);
   const webSocketService = useRef<WebSocketService>(new WebSocketService());
+  useEffect(() => {
+    updateOrders();
+  }, [ordersBatch]);
 
   const getSum = (total: number, ele: OrderBookModel): number => {
     return total + ele.amount;
   };
 
-  const updateOrders = (ordersBatch: OrderBookModel[]) => {
-    const newBids = getBids(ordersBatch, orders.bids);
-    const newAsks = getAsks(ordersBatch, orders.asks);
+  const updateOrders = () => {
+    const newBids = getOrders(ordersBatch, orders.bids, 1);
+    const newAsks = getOrders(ordersBatch, orders.asks, -1);
     const newTotalBids = newBids.reduce(getSum, 0);
     const newTotalAsks = newAsks.reduce(getSum, 0);
 
@@ -79,9 +83,9 @@ const useOrderBook = (): [OrdersBook, () => void, () => void] => {
   const onPressOpen = () => {
     webSocketService.current.initSocket(orderBookSocketConfig);
     webSocketService.current.onMessage(event => {
-      const ordersBatch = orderBookSocketConfig.handler(event);
-      if (ordersBatch) {
-        updateOrders(ordersBatch);
+      const orderssBatch = orderBookSocketConfig.handler(event);
+      if (orderssBatch) {
+        setOrdersBatch(orderssBatch);
       }
     });
   };
