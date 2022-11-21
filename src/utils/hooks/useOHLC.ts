@@ -5,7 +5,6 @@ import WebSocketService from '../../utils/WebSocketService';
 
 function handleOHLCMessage(event: WebSocketMessageEvent): OHLCModel[] | null {
   if (event.data !== undefined) {
-    console.log(event.data);
     const ohlcResponse = JSON.parse(event.data)[1];
     if (ohlcResponse !== undefined && Array.isArray(ohlcResponse)) {
       if (ohlcResponse !== undefined && Array.isArray(ohlcResponse[0])) {
@@ -41,7 +40,7 @@ const ohlcSocketConfig: WebSocketServiceType = {
   message: JSON.stringify({
     event: 'subscribe',
     channel: 'candles',
-    key: 'trade:1D:tBTCUSD',
+    key: 'trade:1m:tBTCUSD',
   }),
   config: JSON.stringify({}),
   socketURL: URLs.webSocketURL,
@@ -53,10 +52,22 @@ const useOHLC = (): [OHLCModel[], () => void, () => void] => {
   const webSocketService = useRef<WebSocketService>(new WebSocketService());
   const [ordersBatch, setOrdersBatch] = useState<any>([]);
   useEffect(() => {
-    const orderssBatch = ohlcSocketConfig.handler(ordersBatch);
+    const newOrderAny = ohlcSocketConfig.handler(ordersBatch);
+    const newOrders = newOrderAny as OHLCModel[];
+    if (newOrders) {
+      const latestTimeStamp = (newOrders[0] as OHLCModel).x.getTime() - 1200000;
+      const newOrders1 = newOrders.filter(ele => {
+        return ele.x.getTime() > latestTimeStamp;
+      });
+      const newOrders2 = orders.filter(ele => {
+        return ele.x.getTime() > latestTimeStamp;
+      });
+      console.log(newOrders1);
 
-    if (orderssBatch) {
-      const newOrdersBatch = [...orders, ...orderssBatch];
+      const newOrdersBatch = [...newOrders1, ...newOrders2];
+      newOrdersBatch.sort(function (a, b) {
+        return a.x < b.x;
+      });
       setOrders(newOrdersBatch);
     }
   }, [ordersBatch]);

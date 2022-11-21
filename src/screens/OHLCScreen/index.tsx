@@ -1,11 +1,6 @@
 import React, {FC} from 'react';
 import {StyleSheet, View} from 'react-native';
-import {
-  VictoryAxis,
-  VictoryCandlestick,
-  VictoryChart,
-  VictoryTheme,
-} from 'victory-native';
+import {VictoryAxis, VictoryCandlestick, VictoryChart} from 'victory-native';
 import PrimaryButton from '../../components/custom/PrimaryButton';
 import {AppTheme} from '../../constants/colors';
 import useOHLC from '../../utils/hooks/useOHLC';
@@ -16,16 +11,29 @@ const OHLCScreen: FC = (): JSX.Element => {
     <View style={styles.backgroundStyle}>
       <PrimaryButton title="open" onPress={onPressOpen} />
       <PrimaryButton title="close" onPress={onPressClose} />
-      <VictoryChart
-        theme={VictoryTheme.material}
-        domainPadding={{x: 25}}
-        scale={{x: 'time'}}>
-        <VictoryAxis tickFormat={t => `${t.getDate()}/${t.getMonth()}`} />
-        <VictoryAxis dependentAxis />
+      <VictoryChart domainPadding={{x: 10, y: 10}} scale={{x: 'time'}}>
+        <VictoryAxis
+          style={{
+            grid: {stroke: '#F4F5F7', strokeWidth: 0.2},
+          }}
+          tickFormat={t => `${t.getDate()}/${t.getMonth()}`}
+        />
+        <VictoryAxis
+          dependentAxis
+          style={{
+            grid: {stroke: '#F4F5F7', strokeWidth: 0.2},
+          }}
+        />
         <VictoryCandlestick
+          style={{
+            data: {
+              stroke: 'white',
+              strokeWidth: 0.5,
+            },
+          }}
           candleWidth={10}
-          candleColors={{positive: '#5f5c5b', negative: '#c43a31'}}
-          data={orders.slice(-20)}
+          candleColors={{positive: '#1bfa02', negative: '#fa0202'}}
+          data={orders}
         />
       </VictoryChart>
     </View>
